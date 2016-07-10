@@ -32,7 +32,7 @@ using System.Text.RegularExpressions;
 namespace ProcessList
 {
     /// <summary>
-    /// List processes by sevral way.
+    /// List processes by several ways.
     /// </summary>
     public static class ProcessLister
     {
