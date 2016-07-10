@@ -82,6 +82,16 @@ namespace ListProcess
             /// </summary>
             /// <value>The snapshot interval.</value>
             public int SnapshotInterval { get; set; } = 1;
+            /// <summary>
+            /// Gets or sets the file name to start process.
+            /// </summary>
+            /// <value>The file path.</value>
+            public string StartFileName { get; set; }
+            /// <summary>
+            /// Gets or sets the arguments to start process.
+            /// </summary>
+            /// <value>The arguments.</value>
+            public string Arguments { get; set; }
         }
 
         /// <summary>
@@ -114,7 +124,7 @@ namespace ListProcess
 
             try
             {
-                processes = options.ListProcess(options.ListingProcess, options.MachineName);
+                processes = ListProcess(options);
             }
             catch (Exception ex)
             {
@@ -124,6 +134,7 @@ namespace ListProcess
 
             ListProcessInfo(processes, options);
         }
+
 
         /// <summary>
         /// Analyzes the command line options and arguments.
@@ -243,6 +254,25 @@ namespace ListProcess
                         options.SnapshotInterval = interval;
                     }
                     break;
+                ///
+                /// start option
+                /// 
+                case "/S":
+                case "-S":
+                    if (args.Length - index < 2)
+                    {
+                        throw new ArgumentException("No file name to start specified.");
+                    }
+                    options.StartFileName = args[++index];
+                    break;
+                case "/A":
+                case "-A":
+                    if (args.Length - index < 2)
+                    {
+                        throw new ArgumentException("No arguments specified.");
+                    }
+                    options.Arguments = args[++index];
+                    break;
                 //
                 // help option
                 //
@@ -274,7 +304,41 @@ namespace ListProcess
             {
                 throw new ArgumentException("Multiple process options specified.");
             }
+            if (options.StartFileName == null && options.Arguments != null)
+            {
+                throw new ArgumentException("Start file name (/S) not specified, but /A.");
+            }
             return options;
+        }
+
+        /// <summary>
+        /// Lists the process.
+        /// </summary>
+        /// <returns>The processes.</returns>
+        /// <param name="options">Listing options.</param>
+        static IEnumerable<Process> ListProcess(ListingOptions options)
+        {
+            IEnumerable<Process> processes;
+
+            if (options.StartFileName == null)
+            {
+                processes = options.ListProcess(options.ListingProcess, options.MachineName);
+            }
+            else
+            {
+                var startingProcess = new Process();
+                startingProcess.StartInfo.FileName = options.StartFileName;
+                startingProcess.StartInfo.Arguments = options.Arguments;
+                startingProcess.StartInfo.UseShellExecute = false;
+                startingProcess.StartInfo.ErrorDialog = true;
+                if (!startingProcess.Start())
+                {
+                    throw new ArgumentException(string.Format("Error: cannot start {0}", options.StartFileName));
+                }
+                processes = new Process[] { startingProcess };
+            }
+
+            return processes;
         }
 
         /// <summary>
@@ -311,10 +375,10 @@ namespace ListProcess
             {
                 foreach (var p in processes)
                 {
-                    if (p.HasExited)
-                    {
-                        continue;
-                    }
+                    //if (p.HasExited)
+                    //{
+                    //    continue;
+                    //}
                     if (p.Modules.Count <= 0)
                     {
                         Console.WriteLine("{0}", p.Id);
@@ -408,7 +472,8 @@ namespace ListProcess
         {
             string[] usage = {
                 @"Usage: ListProcess [/?]",
-                @"       ListProcess [\\MACHINE-NAME] PROCESS [/m] [/s [DURATION]] [/r INTERVAL]",
+                @"       ListProcess [\\MACHINE-NAME] PROCESS [/m] [ SNAPSHOT ]",
+                @"       ListProcess [\\MACHINE-NAME] START [/m] [ SNAPSHOT ]",
                 @"",
                 @"  /?                   -- Show this help.",
                 @"",
@@ -418,9 +483,14 @@ namespace ListProcess
                 @"    /n PROCESS-NAME    -- List by process name. (Case insensitive)",
                 @"    /N PROCESS-NAME-RE -- List by process name regex. (Case insensitive)",
                 @"",
+                @"  STRAT:",
+                @"    /S FILE-NAME [/A ARG]",
+                @"                       -- Start command and arguments for listing.",
+                @"",
                 @"  /m                   -- Show memory info instead of CPU.",
-                @"  /s [DURATION]        -- Snapshot during DURATION seconds. Default is ÏNT_MAX.",
-                @"  /r INTERVAL          -- Set snapshot INTERVAL seconds."
+                @"  SNAPSHOT:",
+                @"    /s [DURATION]      -- Snapshot during DURATION seconds. Default is ÏNT_MAX.",
+                @"    /r INTERVAL        -- Set snapshot INTERVAL seconds."
             };
 
             foreach (var line in usage)
