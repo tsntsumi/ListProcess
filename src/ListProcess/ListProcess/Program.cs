@@ -496,9 +496,10 @@ namespace ListProcess
                 @"                       -- Start command and arguments for listing.",
                 @"",
                 @"  /m                   -- Show memory info instead of CPU.",
+                @"",
                 @"  SNAPSHOT:",
                 @"    /s [DURATION]      -- Snapshot during DURATION seconds. Default is ÏNT_MAX.",
-                @"    /r INTERVAL        -- Set snapshot INTERVAL seconds."
+                @"    /r INTERVAL        -- Set snapshot INTERVAL seconds. Default is 1s."
             };
 
             foreach (var line in usage)

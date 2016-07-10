@@ -4,7 +4,8 @@ List processes and its information tool and library.
 ## Usage of tool
 
     ListProcess [/?]
-    ListProcess [\\MACHINE-NAME] PROCESS [/m] [/s [DURATION]] [/r INTERVAL]
+    ListProcess [\\MACHINE-NAME] PROCESS [/m] [SNAPSHOT]
+	ListProcess [\\MACHINE-NAME] START [/m] [SNAPSHOT]
 
     /?                   -- Show this help.
 
@@ -14,9 +15,15 @@ List processes and its information tool and library.
       /n PROCESS-NAME    -- List by process name. (Case insensitive)
       /N PROCESS-NAME-RE -- List by process name regex. (Case insensitive)
 
+	START:
+	  /S FILE-NAME [/A ARG]
+	                     -- Start command and arguments for listing.
+
     /m                   -- Show memory info instead of CPU.
-    /s [DURATION]        -- Snapshot during DURATION seconds. Default is ÏNT_MAX.
-    /r INTERVAL          -- Set snapshot INTERVAL seconds.
+
+    SNAPSHOT
+      /s [DURATION]      -- Snapshot during DURATION seconds. Default is ÏNT_MAX.
+      /r INTERVAL        -- Set snapshot INTERVAL seconds. Default is 1s.
 
 ## Usage of library
 
