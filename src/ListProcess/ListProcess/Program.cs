@@ -304,6 +304,14 @@ namespace ListProcess
             {
                 throw new ArgumentException("Multiple process options specified.");
             }
+            if (processOptions.Count() == 1 && options.StartFileName != null)
+            {
+                throw new ArgumentException("Process option and start option specified.");
+            }
+            if (processOptions.Count() == 0 && options.StartFileName == null)
+            {
+                throw new ArgumentException("Process option or start option not specified.");
+            }
             if (options.StartFileName == null && options.Arguments != null)
             {
                 throw new ArgumentException("Start file name (/S) not specified, but /A.");
